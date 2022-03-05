@@ -37,8 +37,8 @@ print("""
 Press the buttons to control first cast device, press and hold the buttons to control the second cast device.
 Press Ctrl+C to exit.
 
-A = Pause
-B = Play
+A = Pause/Play
+B = Mute/Unmute
 C = Skip """,skips[0],"""seconds
 D = Skip""",skips[1],"""seconds
 E = Skip """,skips[2],"""seconds
@@ -77,25 +77,42 @@ while True:
        buttonshim.set_brightness(0.5)
        buttonshim.set_pixel(0xFF, 0x00, 0x00)
        cast=cc[selecteddevice]
+       cast.wait()                                  # wait for device to be ready
        mc=cast.media_controller
-       cast.wait()
-       time.sleep(1)
-       mc.pause()
-       #buttonshim.set_pixel(0x00, 0x00, 0x00)
-       buttonshim.set_brightness(0.2)    # must set brightness before colour (0.5 is std)
-       buttonshim.set_pixel(0xFF, 0x00, 0x00)
+       time.sleep(0.3)                              # wait short time for media controller to activate (strictly only needed on first pass)
+       if mc.status.player_state=="PLAYING":
+         mc.pause()
+         buttonshim.set_brightness(0.2)             # must set brightness before colour (0.5 is std)
+         buttonshim.set_pixel(0xFF, 0x00, 0x00)
+       else :                                       # "PAUSED"
+         mc.play()
+         buttonshim.set_brightness(0.5)
+         if cast.status.volume_muted==True:
+           buttonshim.set_pixel(0x00, 0x00, 0xFF)   # blue = muted
+         else:
+           buttonshim.set_pixel(0x00, 0x00, 0x00)
+       #debug
+       time.sleep(0.3)                              # give some time for status to be updated
+       print('State=',mc.status.player_state)
 
     @buttonshim.on_release(buttonshim.BUTTON_B)
     def button_b(button, pressed):
        #print('B pressed')
        buttonshim.set_brightness(0.5)
-       buttonshim.set_pixel(0x00, 0xFF, 0x00)
+       buttonshim.set_pixel(0x00, 0x00, 0xFF)
        cast=cc[selecteddevice]
-       mc=cast.media_controller
        cast.wait()
-       time.sleep(1)
-       mc.play()
-       buttonshim.set_pixel(0x00, 0x00, 0x00)
+       cast.set_volume_muted(not cast.status.volume_muted)
+       time.sleep(0.3)                              # give some time for status to be updated
+       print('Muted=',cast.status.volume_muted)
+       if cast.status.volume_muted==True:
+         buttonshim.set_pixel(0x00, 0x00, 0xFF)     # blue = muted
+       else:
+         if cast.media_controller.status.player_state=="PAUSED":
+           buttonshim.set_brightness(0.2)
+           buttonshim.set_pixel(0xFF, 0x00, 0x00)
+         else:
+           buttonshim.set_pixel(0x00, 0x00, 0x00)   # off = not muted
 
     @buttonshim.on_release(buttonshim.BUTTON_C)
     def button_c(button, pressed):
@@ -103,9 +120,9 @@ while True:
        buttonshim.set_brightness(0.5)
        buttonshim.set_pixel(0xFF, 0x80, 0xFF)
        cast=cc[selecteddevice]
-       mc=cast.media_controller
        cast.wait()
-       time.sleep(1)
+       mc=cast.media_controller
+       time.sleep(0.3)
        skip=skips[0]
        print('Time=',mc.status.current_time)
        print('Skip',skip)
@@ -118,10 +135,11 @@ while True:
        buttonshim.set_brightness(0.5)
        buttonshim.set_pixel(0xFF, 0x80, 0xFF)
        cast=cc[selecteddevice]
-       mc=cast.media_controller
        cast.wait()
-       time.sleep(1)
+       mc=cast.media_controller
+       time.sleep(0.3)
        skip=skips[1]
+       #print(mc.status)
        print('Time=',mc.status.current_time)
        print('Skip',skip)
        mc.seek(int(mc.status.current_time) + skip)
@@ -133,9 +151,9 @@ while True:
        buttonshim.set_brightness(0.5)
        buttonshim.set_pixel(0xFF, 0x80, 0xFF)
        cast=cc[selecteddevice]
-       mc=cast.media_controller
        cast.wait()
-       time.sleep(1)
+       mc=cast.media_controller
+       time.sleep(0.3)
        skip=skips[2]
        print('Time=',mc.status.current_time)
        print('Skip',skip)
