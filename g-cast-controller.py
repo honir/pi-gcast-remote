@@ -11,7 +11,7 @@ chromecasts_name=['Living Room Speaker','Living Room TV']
 
 #Values for the skip times when buttons C,D,E are pressed.
 # You can enter these on the commandline  e.g. g-cast-controller.py -5 -30 30
-#   (note values <5 are  not always obeyed by the Chromcast
+#   (note values <5 are not always obeyed by the Chromecast
 skips=[-5,-15,+30]
 
 # overwrite with values from the commandline
@@ -23,7 +23,12 @@ if len(sys.argv[1:])>0:
   skips.append(int(sys.argv[3]))
 
 print("Discovering connected Chromecasts")
-devices, browser = pychromecast.get_chromecasts()
+# list chromecasts on the network, but don't connect
+services, browser = pychromecast.discovery.discover_chromecasts()
+# shut down discovery
+pychromecast.discovery.stop_discovery(browser)
+# connect to our chromecasts
+devices, browser = pychromecast.get_listed_chromecasts(friendly_names=chromecasts_name[:])
 
 selecteddevice=0
 cc = []
@@ -95,7 +100,7 @@ while True:
        buttonshim.set_brightness(0.5)
        buttonshim.set_pixel(0xFF, 0x00, 0x00)
        cast=cc[selecteddevice]
-       cast.wait()                                  # wait for device to be ready
+       cast.wait()                                  # start socket client's worker thread and wait for initial status update
        mc=cast.media_controller
        time.sleep(0.3)                              # wait short time for media controller to activate (strictly only needed on first pass)
        if mc.status.player_state=="PLAYING":
