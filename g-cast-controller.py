@@ -51,6 +51,24 @@ while True:
      time.sleep(5)
   elif not devices==[]:
 
+    def button_led(buttonshim, cast):
+      # if pause/play is set to play we should check state of mute/unmute and set led appropriately
+      # if mute/unmute is set to unmute we should check state of pause/play and set led appropriately
+      #
+      time.sleep(0.3)                               # give some time for status to be updated
+      if cast.media_controller.status.player_state=="PAUSED":
+        buttonshim.set_brightness(0.2)
+        buttonshim.set_pixel(0xFF, 0x00, 0x00)      # red = paused
+        buttonshim.set_brightness(0.5)
+      else:
+        if cast.status.volume_muted==True:
+          buttonshim.set_brightness(0.2)
+          buttonshim.set_pixel(0x00, 0x00, 0xFF)    # blue = muted
+          buttonshim.set_brightness(0.5)
+        else:
+          # leave led alone
+          pass
+
     if len(cc) > 1:
       @buttonshim.on_press(None)
       def button_press(button, state):
@@ -87,13 +105,10 @@ while True:
        else :                                       # "PAUSED"
          mc.play()
          buttonshim.set_brightness(0.5)
-         if cast.status.volume_muted==True:
-           buttonshim.set_pixel(0x00, 0x00, 0xFF)   # blue = muted
-         else:
-           buttonshim.set_pixel(0x00, 0x00, 0x00)
-       #debug
+         buttonshim.set_pixel(0x00, 0x00, 0x00)
        time.sleep(0.3)                              # give some time for status to be updated
-       print('State=',mc.status.player_state)
+       button_led(buttonshim, cast)                 # check for mute/unmute status
+       print('State=',mc.status.player_state)       # debug
 
     @buttonshim.on_release(buttonshim.BUTTON_B)
     def button_b(button, pressed):
@@ -104,15 +119,12 @@ while True:
        cast.wait()
        cast.set_volume_muted(not cast.status.volume_muted)
        time.sleep(0.3)                              # give some time for status to be updated
-       print('Muted=',cast.status.volume_muted)
        if cast.status.volume_muted==True:
          buttonshim.set_pixel(0x00, 0x00, 0xFF)     # blue = muted
        else:
-         if cast.media_controller.status.player_state=="PAUSED":
-           buttonshim.set_brightness(0.2)
-           buttonshim.set_pixel(0xFF, 0x00, 0x00)
-         else:
-           buttonshim.set_pixel(0x00, 0x00, 0x00)   # off = not muted
+         buttonshim.set_pixel(0x00, 0x00, 0x00)     # off = not muted
+       button_led(buttonshim, cast)                 # check for pause/play status
+       print('Muted=',cast.status.volume_muted)     # debug
 
     @buttonshim.on_release(buttonshim.BUTTON_C)
     def button_c(button, pressed):
@@ -128,6 +140,7 @@ while True:
        print('Skip',skip)
        mc.seek(int(mc.status.current_time) + skip)
        buttonshim.set_pixel(0x00, 0x00, 0x00)
+       button_led(buttonshim, cast)                 # check for mute/unmute status
 
     @buttonshim.on_release(buttonshim.BUTTON_D)
     def button_d(button, pressed):
@@ -144,6 +157,7 @@ while True:
        print('Skip',skip)
        mc.seek(int(mc.status.current_time) + skip)
        buttonshim.set_pixel(0x00, 0x00, 0x00)
+       button_led(buttonshim, cast)                 # check for mute/unmute status
 
     @buttonshim.on_release(buttonshim.BUTTON_E)
     def button_e(button, pressed):
@@ -159,4 +173,5 @@ while True:
        print('Skip',skip)
        mc.seek(int(mc.status.current_time) + skip)
        buttonshim.set_pixel(0x00, 0x00, 0x00)
+       button_led(buttonshim, cast)                 # check for mute/unmute status
 
