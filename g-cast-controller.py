@@ -61,7 +61,7 @@ while True:
       # if mute/unmute is set to unmute we should check state of pause/play and set led appropriately
       #
       time.sleep(0.3)                               # give some time for status to be updated
-      if cast.media_controller.status.player_state==pychromecast.controllers.media.MEDIA_PLAYER_STATE_PAUSED:
+      if cast.media_controller.status.player_is_paused:
         buttonshim.set_brightness(0.2)
         buttonshim.set_pixel(0xFF, 0x00, 0x00)      # red = paused
         buttonshim.set_brightness(0.5)
@@ -103,7 +103,7 @@ while True:
        cast.wait()                                  # start socket client's worker thread and wait for initial status update
        mc=cast.media_controller
        time.sleep(0.3)                              # wait short time for media controller to activate (strictly only needed on first pass)
-       if mc.status.player_state==pychromecast.controllers.media.MEDIA_PLAYER_STATE_PLAYING:
+       if mc.status.player_is_playing:
          mc.pause()
          buttonshim.set_brightness(0.2)             # must set brightness before colour (0.5 is std)
          buttonshim.set_pixel(0xFF, 0x00, 0x00)
