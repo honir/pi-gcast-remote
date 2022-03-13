@@ -140,6 +140,7 @@ while True:
        cast.wait()
        mc=cast.media_controller
        time.sleep(0.3)
+       mc.update_status()
        skip=skips[0]
        print('Time=',mc.status.current_time)
        print('Skip',skip)
@@ -156,6 +157,7 @@ while True:
        cast.wait()
        mc=cast.media_controller
        time.sleep(0.3)
+       mc.update_status()
        skip=skips[1]
        #print(mc.status)
        print('Time=',mc.status.current_time)
@@ -173,6 +175,7 @@ while True:
        cast.wait()
        mc=cast.media_controller
        time.sleep(0.3)
+       mc.update_status()
        skip=skips[2]
        print('Time=',mc.status.current_time)
        print('Skip',skip)
