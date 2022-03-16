@@ -140,7 +140,13 @@ while True:
        cast.wait()
        mc=cast.media_controller
        time.sleep(0.3)
-       mc.update_status()
+       mc.update_status()                           # todo: this breaks if cc not 'active'
+
+       # seems to be a bug with pychromecast - doesn't always update the current_time
+       # so skip goes back too far (back to the point of last pause?)
+       # a short wait seems to help but doesn't fix it 100% of the time
+       time.sleep(0.3)
+
        skip=skips[0]
        print('Time=',mc.status.current_time)
        print('Skip',skip)
@@ -157,7 +163,10 @@ while True:
        cast.wait()
        mc=cast.media_controller
        time.sleep(0.3)
-       mc.update_status()
+       mc.update_status()                           # todo: this breaks if cc not 'active'
+
+       time.sleep(0.3)
+
        skip=skips[1]
        #print(mc.status)
        print('Time=',mc.status.current_time)
@@ -175,7 +184,10 @@ while True:
        cast.wait()
        mc=cast.media_controller
        time.sleep(0.3)
-       mc.update_status()
+       mc.update_status()                            # todo: this breaks if cc not 'active'
+
+       time.sleep(0.3)
+
        skip=skips[2]
        print('Time=',mc.status.current_time)
        print('Skip',skip)
